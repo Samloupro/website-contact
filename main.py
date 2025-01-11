@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 import uuid
 import logging
 from urllib.parse import urlparse
-from utils.email_extractor import extract_emails_html, extract_emails_jsonld
+from utils.email_extractor import extract_emails_html, extract_emails_jsonld, extract_valid_emails
 from utils.phone_extractor import extract_phones_html, extract_phones_jsonld, validate_phones
 from utils.social_links import extract_social_links_jsonld
 from utils.link_scraper import link_scraper, extract_links, is_valid_url
@@ -66,6 +66,14 @@ def scrape():
             social_links = extract_social_links_jsonld(soup)
         else:
             return jsonify({'error': 'Failed to fetch the URL'}), 500
+
+    # Use the new extract_valid_emails function here
+    if include_emails:
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            soup = BeautifulSoup(response.text, 'html.parser')
+            valid_emails = extract_valid_emails(response.text, soup)
+            emails = {email: [] for email in valid_emails}
 
     result = {
         "request_id": str(uuid.uuid4()),
