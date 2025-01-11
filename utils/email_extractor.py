@@ -3,6 +3,7 @@ import json
 import logging
 from email_validator import validate_email, EmailNotValidError
 
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
