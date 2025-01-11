@@ -7,21 +7,20 @@ from email_validator import validate_email, EmailNotValidError
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def extract_emails_html_strict(text):
-    email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b'
-    potential_emails = re.findall(email_pattern, text)
-    valid_emails = []
+def extract_emails_html(text):
+   
+    # Expression régulière améliorée avec lookahead négatif
+    email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}(?![A-Za-z])\b'
     
-    for email in potential_emails:
-        try:
-            # Valider l'e-mail
-            valid = validate_email(email)
-            valid_emails.append(valid.email)
-            logger.info(f"Email valide extrait du HTML : {valid.email}")
-        except EmailNotValidError as e:
-            logger.warning(f"Adresse e-mail invalide trouvée : {email} - {e}")
+    # Utilisation de re.findall pour extraire les e-mails correspondants
+    emails = re.findall(email_pattern, text)
     
-    return valid_emails
+    # Log des e-mails extraits
+    for email in emails:
+        logger.info(f"Email extrait du HTML : {email}")
+        
+    return emails
+
 
 def extract_emails_jsonld(soup):
     emails = []
