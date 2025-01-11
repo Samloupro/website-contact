@@ -14,7 +14,7 @@ from utils.link_analyzer import analyze_links
 import requests
 
 app = Flask(__name__)
-SCRIPT_VERSION = "V 1.4"
+SCRIPT_VERSION = "V 1.0.1 //email validation "
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
