@@ -1,14 +1,22 @@
 import re
 import json
+import phonenumbers
 
 def validate_phones(phones):
-    valid_phone_pattern = re.compile(r'\b(?:\d{1,4}[-.\s]?)?(\d{3}[-.\s]?){2}\d{4}\b')
-    return [phone for phone in phones if valid_phone_pattern.match(phone)]
+    valid_phones = []
+    for phone in phones:
+        try:
+            parsed_phone = phonenumbers.parse(phone, "US")  # Use the appropriate country code
+            if phonenumbers.is_valid_number(parsed_phone):
+                valid_phones.append(phone)
+        except phonenumbers.NumberParseException:
+            continue
+    return valid_phones
 
 def extract_phones_html(text):
     phone_pattern = re.compile(r'\b(?:\d{1,4}[-.\s]?)?(\d{3}[-.\s]?){2}\d{4}\b')
     phones = phone_pattern.findall(text)
-    return phones
+    return validate_phones(phones)
 
 def extract_phones_jsonld(soup):
     phones = set()
@@ -18,8 +26,12 @@ def extract_phones_jsonld(soup):
             data = json.loads(script.string)
             if "telephone" in data:
                 phone = data["telephone"]
-                if re.match(r'\b(?:\d{1,4}[-.\s]?)?(\d{3}[-.\s]?){2}\d{4}\b', phone):
-                    phones.add(phone)
+                try:
+                    parsed_phone = phonenumbers.parse(phone, "US")  # Use the appropriate country code
+                    if phonenumbers.is_valid_number(parsed_phone):
+                        phones.add(phone)
+                except phonenumbers.NumberParseException:
+                    continue
         except (json.JSONDecodeError, TypeError):
             continue
     return list(phones)
