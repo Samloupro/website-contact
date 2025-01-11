@@ -9,23 +9,24 @@ from utils.email_extractor import extract_emails_html, extract_emails_jsonld, ex
 from utils.phone_extractor import extract_phones_html, extract_phones_jsonld, validate_phones
 from utils.social_links import extract_social_links_jsonld
 from utils.link_scraper import link_scraper, extract_links, is_valid_url
-from utils.user_agent import get_user_agent_headers  # Ensure this import is present
+from utils.user_agent import get_user_agent_headers
 from utils.link_analyzer import analyze_links
 import requests
+from email_validator import validate_email, EmailNotValidError
 
 app = Flask(__name__)
-SCRIPT_VERSION = "V 1.4"
+SCRIPT_VERSION = "V 1.5 // commit"
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def analyze_links_parallel(links, headers, domain):
+def analyze_links_parallel(links, headers):
     valid_links = [link for link in links if is_valid_url(link)]
     with ThreadPoolExecutor() as executor:
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         tasks = [
-            loop.run_in_executor(executor, analyze_links, link, headers, domain)
+            loop.run_in_executor(executor, analyze_links, link, headers)
             for link in valid_links
         ]
         results = loop.run_until_complete(asyncio.gather(*tasks))
@@ -40,11 +41,8 @@ def scrape():
     include_phones = request.args.get('include_phones', 'true').lower() == 'true'
     include_social_links = request.args.get('include_social_links', 'true').lower() == 'true'
     include_unique_links = request.args.get('include_unique_links', 'true').lower() == 'true'
-    
-    max_link = request.args.get('max_link')  # Get the max_link parameter from the query string
-    max_link = int(max_link) if max_link else None
 
-    links, error = link_scraper(url, headers, max_link)
+    links, error = link_scraper(url, headers)
     if error:
         return jsonify({'error': error}), 500
 
@@ -52,7 +50,7 @@ def scrape():
 
     emails, phones, visited_links = {}, {}, set()
     if include_emails or include_phones or include_unique_links:
-        results = analyze_links_parallel(links, headers, domain)
+        results = analyze_links_parallel(links, headers)
         for result in results:
             emails.update(result[0])
             phones.update(result[1])
@@ -67,7 +65,6 @@ def scrape():
         else:
             return jsonify({'error': 'Failed to fetch the URL'}), 500
 
-    # Use the new extract_valid_emails function here
     if include_emails:
         response = requests.get(url, headers=headers)
         if response.status_code == 200:
@@ -82,7 +79,7 @@ def scrape():
         "status": "OK",
         "data": [
             {
-                "emails": [{"value": email, "sources": sources} for email, sources in emails.items()] if include_emails else [],
+                "emails": [{"value": email, "sources": sources} for email, sources in emails.items() if validate_email_address(email)] if include_emails else [],
                 "phone_numbers": [{"value": phone, "sources": sources} for phone, sources in phones.items()] if include_phones else [],
                 "social_links": social_links if include_social_links else {},
                 "unique_links": sorted(list(visited_links)) if include_unique_links else []
@@ -92,6 +89,13 @@ def scrape():
 
     logger.info(f"Processed URL: {url}")
     return jsonify(result)
+
+def validate_email_address(email):
+    try:
+        validate_email(email)
+        return True
+    except EmailNotValidError:
+        return False
 
 if __name__ == '__main__':
     print(f"Starting script version: {SCRIPT_VERSION}")
