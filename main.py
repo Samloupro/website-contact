@@ -19,13 +19,13 @@ SCRIPT_VERSION = "V 1.4"
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def analyze_links_parallel(links, headers):
+def analyze_links_parallel(links, headers, domain):
     valid_links = [link for link in links if is_valid_url(link)]
     with ThreadPoolExecutor() as executor:
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         tasks = [
-            loop.run_in_executor(executor, analyze_links, link, headers)
+            loop.run_in_executor(executor, analyze_links, link, headers, domain)
             for link in valid_links
         ]
         results = loop.run_until_complete(asyncio.gather(*tasks))
@@ -52,7 +52,7 @@ def scrape():
 
     emails, phones, visited_links = {}, {}, set()
     if include_emails or include_phones or include_unique_links:
-        results = analyze_links_parallel(links, headers)
+        results = analyze_links_parallel(links, headers, domain)
         for result in results:
             emails.update(result[0])
             phones.update(result[1])
