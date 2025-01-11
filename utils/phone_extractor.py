@@ -1,6 +1,6 @@
-import re
 import json
 import phonenumbers
+from phonenumbers import PhoneNumberMatcher
 
 def validate_phones(phones):
     valid_phones = []
@@ -14,9 +14,10 @@ def validate_phones(phones):
     return valid_phones
 
 def extract_phones_html(text):
-    phone_pattern = re.compile(r'\b(?:\d{1,4}[-.\s]?)?(\d{3}[-.\s]?){2}\d{4}\b')
-    phones = phone_pattern.findall(text)
-    return validate_phones(phones)
+    phones = []
+    for match in PhoneNumberMatcher(text, "US"):  # Use the appropriate country code
+        phones.append(phonenumbers.format_number(match.number, phonenumbers.PhoneNumberFormat.E164))
+    return phones
 
 def extract_phones_jsonld(soup):
     phones = set()
@@ -29,7 +30,7 @@ def extract_phones_jsonld(soup):
                 try:
                     parsed_phone = phonenumbers.parse(phone, "US")  # Use the appropriate country code
                     if phonenumbers.is_valid_number(parsed_phone):
-                        phones.add(phone)
+                        phones.add(phonenumbers.format_number(parsed_phone, phonenumbers.PhoneNumberFormat.E164))
                 except phonenumbers.NumberParseException:
                     continue
         except (json.JSONDecodeError, TypeError):
