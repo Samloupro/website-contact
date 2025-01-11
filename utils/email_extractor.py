@@ -6,7 +6,7 @@ def extract_emails_html(text):
 
 def extract_emails_jsonld(soup):
     emails = []
-    email_regex = re.compile(r'[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+')
+    email_regex = re.compile(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$')
     scripts = soup.find_all("script", type="application/ld+json")
     for script in scripts:
         try:
