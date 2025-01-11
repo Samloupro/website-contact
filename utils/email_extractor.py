@@ -8,9 +8,13 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def extract_emails_html(text):
-    emails = re.findall(r'[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+', text)
+    # Expression régulière améliorée
+    email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b'
+    emails = re.findall(email_pattern, text)
+    
     for email in emails:
-        logger.info(f"Extracted email from HTML: {email}")
+        logger.info(f"Email extrait du HTML : {email}")
+        
     return emails
 
 def extract_emails_jsonld(soup):
