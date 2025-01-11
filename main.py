@@ -9,7 +9,7 @@ from utils.email_extractor import extract_emails_html, extract_emails_jsonld
 from utils.phone_extractor import extract_phones_html, extract_phones_jsonld, validate_phones
 from utils.social_links import extract_social_links_jsonld
 from utils.link_scraper import link_scraper, extract_links, is_valid_url
-from utils.user_agent import get_user_agent_headers
+from utils.user_agent import get_user_agent_headers  # Ensure this import is present
 from utils.link_analyzer import analyze_links
 import requests
 
@@ -40,9 +40,11 @@ def scrape():
     include_phones = request.args.get('include_phones', 'true').lower() == 'true'
     include_social_links = request.args.get('include_social_links', 'true').lower() == 'true'
     include_unique_links = request.args.get('include_unique_links', 'true').lower() == 'true'
-    max_link = int(request.args.get('max_link', 20))  # Default to 20 if not provided
+    
+    max_link = request.args.get('max_link')  # Get the max_link parameter from the query string
+    max_link = int(max_link) if max_link else None
 
-    links, error = link_scraper(url, headers)
+    links, error = link_scraper(url, headers, max_link)
     if error:
         return jsonify({'error': error}), 500
 
@@ -50,7 +52,7 @@ def scrape():
 
     emails, phones, visited_links = {}, {}, set()
     if include_emails or include_phones or include_unique_links:
-        results = analyze_links_parallel(links[:max_link], headers)  # Limit to max_link
+        results = analyze_links_parallel(links, headers)
         for result in results:
             emails.update(result[0])
             phones.update(result[1])
