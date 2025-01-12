@@ -51,21 +51,25 @@ def scrape():
     domain = urlparse(url).netloc
 
     emails, phones, visited_links = {}, {}, set()
-    if include_emails or include_phones or include_unique_links:
-        results = analyze_links_parallel(links, headers, domain)
-        for result in results:
-            emails.update(result[0])
-            phones.update(result[1])
-            visited_links.update(result[2])
+    if include_unique_links and not (include_emails or include_phones or include_social_links):
+        valid_links = [link for link in links if is_valid_url(link)]
+        visited_links.update(valid_links)
+    else:
+        if include_emails or include_phones or include_unique_links:
+            results = analyze_links_parallel(links, headers, domain)
+            for result in results:
+                emails.update(result[0])
+                phones.update(result[1])
+                visited_links.update(result[2])
 
-    social_links = {}
-    if include_social_links:
-        response = requests.get(url, headers=headers)
-        if response.status_code == 200:
-            soup = BeautifulSoup(response.text, 'html.parser')
-            social_links = extract_social_links_jsonld(soup)
-        else:
-            return jsonify({'error': 'Failed to fetch the URL'}), 500
+        social_links = {}
+        if include_social_links:
+            response = requests.get(url, headers=headers)
+            if response.status_code == 200:
+                soup = BeautifulSoup(response.text, 'html.parser')
+                social_links = extract_social_links_jsonld(soup)
+            else:
+                return jsonify({'error': 'Failed to fetch the URL'}), 500
 
     result = {
         "request_id": str(uuid.uuid4()),
