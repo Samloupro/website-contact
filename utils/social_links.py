@@ -21,7 +21,7 @@ def extract_social_links_jsonld(soup):
                     for key in social_links:
                         if key in link:
                             social_links[key] = link
+                            print(f"Found {key.capitalize()} link: {link}")
         except (json.JSONDecodeError, TypeError):
             continue
     return social_links
-
