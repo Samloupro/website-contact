@@ -42,6 +42,10 @@ def link_scraper(url, headers, max_link=None):
     try:
         response = requests.get(url, headers=headers, timeout=60)
         response.raise_for_status()
+        
+        # Log status code and headers
+        logger.info(f"Response status code: {response.status_code}")
+        logger.info(f"Response headers: {response.headers}")
 
         soup = BeautifulSoup(response.text, 'html.parser')
 
