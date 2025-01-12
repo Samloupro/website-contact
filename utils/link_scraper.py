@@ -40,7 +40,7 @@ def link_scraper(url, headers, max_link=None):
         return {'error': 'Invalid URL provided.'}, 400
 
     try:
-        response = requests.get(url, headers=headers, timeout=10)
+        response = requests.get(url, headers=headers, timeout=60)
         response.raise_for_status()
 
         soup = BeautifulSoup(response.text, 'html.parser')
