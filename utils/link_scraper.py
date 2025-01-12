@@ -6,6 +6,7 @@ import json
 
 logger = logging.getLogger(__name__)
 
+
 def is_valid_url(url):
     parsed = urlparse(url)
     return bool(parsed.netloc) and bool(parsed.scheme)
