@@ -10,14 +10,18 @@ def is_valid_url(url):
     parsed = urlparse(url)
     return bool(parsed.netloc) and bool(parsed.scheme)
 
-def extract_links(soup, base_url):
+def extract_links_jsonld(soup):
     links = set()
-    for a_tag in soup.find_all("a", href=True):
-        href = a_tag["href"]
-        if href.startswith("/"):
-            href = base_url.rstrip("/") + href
-        if href.startswith("http") and is_valid_url(href):
-            links.add(href)
+    scripts = soup.find_all("script", type="application/ld+json")
+    for script in scripts:
+        try:
+            data = json.loads(script.string)
+            if "sameAs" in data:
+                for link in data["sameAs"]:
+                    if link and link.startswith("http") and is_valid_url(link):
+                        links.add(link)
+        except (json.JSONDecodeError, TypeError):
+            continue
     return links
 
 def extract_links_jsonld(soup):
