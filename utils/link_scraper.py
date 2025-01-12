@@ -53,7 +53,11 @@ def link_scraper(url, headers, max_link=None):
         logger.info(f"Response headers: {response.headers}")
 
         # Log the HTML content fetched
-        logger.info(f"Fetched HTML content: {response.text[:500]}")  # Log first 500 chars of response
+        if response.status_code == 200:
+            logger.info("***HTML FETCH SUCCESS***")
+            logger.info(f"Fetched HTML content: {response.text[:500]}")  # Log first 500 chars of response
+        else:
+            logger.error("***HTML FETCH FAILED***")
 
         soup = BeautifulSoup(response.text, 'html.parser')
 
@@ -70,4 +74,5 @@ def link_scraper(url, headers, max_link=None):
         return list(all_links), None
     except requests.RequestException as e:
         logger.error(f"Error scraping {url}: {e}")
+        logger.error("***HTML FETCH FAILED***")
         return [], str(e)
