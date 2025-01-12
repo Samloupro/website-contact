@@ -51,7 +51,9 @@ def link_scraper(url, headers, max_link=None):
         # Log response details
         logger.info(f"Response status code: {response.status_code}")
         logger.info(f"Response headers: {response.headers}")
-        logger.info(f"Response content: {response.text[:500]}")  # Log first 500 chars of response
+
+        # Log the HTML content fetched
+        logger.info(f"Fetched HTML content: {response.text[:500]}")  # Log first 500 chars of response
 
         soup = BeautifulSoup(response.text, 'html.parser')
 
