@@ -7,7 +7,7 @@ import logging
 from urllib.parse import urlparse
 from utils.email_extractor import extract_emails_html, extract_emails_jsonld
 from utils.phone_extractor import extract_phones_html, extract_phones_jsonld, validate_phones
-from utils.social_links import extract_social_links_jsonld
+from utils.social_links import extract_social_links  # Updated import statement
 from utils.link_scraper import link_scraper, extract_links, is_valid_url
 from utils.user_agent import get_user_agent_headers  # Ensure this import is present
 from utils.link_analyzer import analyze_links
@@ -64,12 +64,7 @@ def scrape():
 
         social_links = {}
         if include_social_links:
-            response = requests.get(url, headers=headers)
-            if response.status_code == 200:
-                soup = BeautifulSoup(response.text, 'html.parser')
-                social_links = extract_social_links_jsonld(soup)
-            else:
-                return jsonify({'error': 'Failed to fetch the URL'}), 500
+            social_links = extract_social_links(visited_links)  # Updated function call
 
     result = {
         "request_id": str(uuid.uuid4()),
