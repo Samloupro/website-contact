@@ -21,7 +21,8 @@ def extract_phones_html(text):
     phones = []
     for match in PhoneNumberMatcher(text, "US"):  # Use the appropriate country code
         phones.append(phonenumbers.format_number(match.number, phonenumbers.PhoneNumberFormat.E164))
-    logging.info(f"Extracted phones from HTML: {phones}")
+    if phones:
+        logging.info(f"Extracted phones from HTML: {phones}")
     return phones
 
 def extract_phones_jsonld(soup):
@@ -41,5 +42,6 @@ def extract_phones_jsonld(soup):
         except (json.JSONDecodeError, TypeError):
             continue
     phones_list = list(phones)
-    logging.info(f"Extracted phones from JSON-LD: {phones_list}")
+    if phones_list:
+        logging.info(f"Extracted phones from JSON-LD: {phones_list}")
     return phones_list
