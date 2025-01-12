@@ -41,11 +41,17 @@ def link_scraper(url, headers, max_link=None):
 
     try:
         response = requests.get(url, headers=headers, timeout=60)
+        
+        # Log request details
+        logger.info(f"Request URL: {url}")
+        logger.info(f"Request headers: {headers}")
+
         response.raise_for_status()
         
-        # Log status code and headers
+        # Log response details
         logger.info(f"Response status code: {response.status_code}")
         logger.info(f"Response headers: {response.headers}")
+        logger.info(f"Response content: {response.text[:500]}")  # Log first 500 chars of response
 
         soup = BeautifulSoup(response.text, 'html.parser')
 
