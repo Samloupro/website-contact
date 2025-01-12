@@ -25,11 +25,13 @@ def extract_links_jsonld(soup):
     scripts = soup.find_all("script", type="application/ld+json")
     for script in scripts:
         try:
-            data = json.loads(script.string)
-            if "sameAs" in data:
-                for link in data["sameAs"]:
-                    if link.startswith("http") and is_valid_url(link):
-                        links.add(link)
+            # Ensure script.string is not None before loading it as JSON
+            if script.string:
+                data = json.loads(script.string)
+                if "sameAs" in data:
+                    for link in data["sameAs"]:
+                        if link.startswith("http") and is_valid_url(link):
+                            links.add(link)
         except (json.JSONDecodeError, TypeError):
             continue
     return links
