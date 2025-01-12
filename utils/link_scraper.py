@@ -18,7 +18,7 @@ def extract_links_jsonld(soup):
             data = json.loads(script.string)
             if "sameAs" in data:
                 for link in data["sameAs"]:
-                    if link and link.startswith("http") and is_valid_url(link):
+                    if link.startswith("http") and is_valid_url(link):
                         links.add(link)
         except (json.JSONDecodeError, TypeError):
             continue
